@@ -1,38 +1,37 @@
-/**
- * ES234317-Algorithm and Data Structures
- * Semester Ganjil, 2024/2025
- * Group Capstone Project
- * Group #3
- * 1 - 5026221134 - Mohammad Affan Shofi
- * 2 - 5026231121 - Rian Chairul Ichsan
- * 3 - 5026231211 - Hafidz Putra Dermawan
- */
-
 package sudoku;
 
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * The main Sudoku program
- */
 public class SudokuMain extends JFrame {
     private static final long serialVersionUID = 1L;
+    private GameBoardPanel board = new GameBoardPanel();
+    private JTextField statusBar = new JTextField("Welcome to Sudoku!"); // Status bar
+    private JLabel timerLabel = new JLabel("Time: 00:00"); // Timer display
+    private Timer timer; // Swing Timer for countdown or elapsed time
+    private int seconds = 0; // Tracks elapsed seconds
 
-    // Private variables
-    GameBoardPanel board = new GameBoardPanel();
-    JTextField statusBar = new JTextField("Welcome to Sudoku!");
-    private JLabel timerLabel = new JLabel("Time: 00:00");
-    private Timer timer;
-    private int seconds = 0;
-
-    // Constructor
     public SudokuMain() {
+        // Setup JFrame layout
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
 
         // Add game board
         cp.add(board, BorderLayout.CENTER);
+
+        // Add timer label at the top
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(timerLabel, BorderLayout.WEST);
+        cp.add(topPanel, BorderLayout.NORTH);
+
+        // Add status bar at the bottom
+        statusBar.setEditable(false);
+        statusBar.setHorizontalAlignment(JTextField.CENTER);
+        cp.add(statusBar, BorderLayout.SOUTH);
+
+        // Timer setup
+        timer = new Timer(1000, e -> updateTimer());
+        timer.start();
 
         // Add a menu bar
         JMenuBar menuBar = new JMenuBar();
@@ -40,9 +39,15 @@ public class SudokuMain extends JFrame {
         // File menu
         JMenu fileMenu = new JMenu("File");
         JMenuItem newGameItem = new JMenuItem("New Game");
-        newGameItem.addActionListener(e -> board.newGame());  // Start new game
+        newGameItem.addActionListener(e -> {
+            board.newGame();
+            updateStatusBar();
+        }); // Start new game
         JMenuItem resetGameItem = new JMenuItem("Reset Game");
-        resetGameItem.addActionListener(e -> board.resetGame());  // Reset the game
+        resetGameItem.addActionListener(e -> {
+            board.resetGame();
+            updateStatusBar();
+        }); // Reset the game
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(e -> System.exit(0));
         fileMenu.add(newGameItem);
@@ -50,8 +55,10 @@ public class SudokuMain extends JFrame {
         fileMenu.addSeparator();
         fileMenu.add(exitItem);
 
-        // Options menu for difficulty
+        // Options menu
         JMenu optionsMenu = new JMenu("Options");
+
+        // Difficulty options
         JMenuItem easyItem = new JMenuItem("Easy");
         easyItem.addActionListener(e -> board.setDifficulty("Easy"));
         JMenuItem mediumItem = new JMenuItem("Intermediate");
@@ -61,6 +68,27 @@ public class SudokuMain extends JFrame {
         optionsMenu.add(easyItem);
         optionsMenu.add(mediumItem);
         optionsMenu.add(hardItem);
+        optionsMenu.addSeparator();
+
+        // Functional options
+        JMenuItem checkItem = new JMenuItem("Check Progress");
+        checkItem.addActionListener(e -> {
+            board.checkProgress();
+            updateStatusBar();
+        });
+        JMenuItem hintItem = new JMenuItem("Hint");
+        hintItem.addActionListener(e -> {
+            board.giveHint();
+            updateStatusBar();
+        });
+        JMenuItem solveItem = new JMenuItem("Solve");
+        solveItem.addActionListener(e -> {
+            board.solvePuzzle();
+            updateStatusBar();
+        });
+        optionsMenu.add(checkItem);
+        optionsMenu.add(hintItem);
+        optionsMenu.add(solveItem);
 
         // Help menu
         JMenu helpMenu = new JMenu("Help");
@@ -74,56 +102,44 @@ public class SudokuMain extends JFrame {
         menuBar.add(helpMenu);
         setJMenuBar(menuBar);
 
-        // Add timer and top panel
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(timerLabel, BorderLayout.WEST);
-        cp.add(topPanel, BorderLayout.NORTH);
-
-        // Add side panel
-        JPanel sidePanel = new JPanel(new GridLayout(5, 1));
-        JButton hintButton = new JButton("Hint");
-        JButton checkButton = new JButton("Check");
-        JButton solveButton = new JButton("Solve");
-        sidePanel.add(hintButton);
-        sidePanel.add(checkButton);
-        sidePanel.add(solveButton);
-        cp.add(sidePanel, BorderLayout.EAST);
-
-        // Add status bar
-        statusBar.setEditable(false);
-        statusBar.setHorizontalAlignment(JTextField.CENTER);
-        cp.add(statusBar, BorderLayout.SOUTH);
-
-        // Timer logic
-        timer = new Timer(1000, e -> {
-            seconds++;
-            timerLabel.setText(String.format("Time: %02d:%02d", seconds / 60, seconds % 60));
-        });
-        timer.start();
-
-        // Button functionality
-        hintButton.addActionListener(e -> board.giveHint());
-        checkButton.addActionListener(e -> board.checkProgress());
-        solveButton.addActionListener(e -> board.solvePuzzle());
-
-        // Initialize game board
+        // Initialize the game board
         board.newGame();
         updateStatusBar();
-
-        // Status listener
-        board.addStatusListener(e -> updateStatusBar());
 
         // Setup frame
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Sudoku");
-        setSize(700, 700);
         setVisible(true);
+
     }
 
+    private void addDifficultyMenuItem(JMenu menu, String difficulty) {
+        JMenuItem item = new JMenuItem(difficulty);
+        item.addActionListener(e -> {
+            board.setDifficulty(difficulty);
+            board.newGame();
+            resetTimer();
+            updateStatusBar();
+        });
+        menu.add(item);
+    }
+
+    // Updates the timer label every second
+    private void updateTimer() {
+        seconds++;
+        timerLabel.setText(String.format("Time: %02d:%02d", seconds / 60, seconds % 60));
+    }
+
+    // Updates the status bar with the remaining cells
     private void updateStatusBar() {
         int remainingCells = board.getRemainingCells();
         statusBar.setText(remainingCells + " cells remaining");
+    }
+
+    private void resetTimer() {
+        seconds = 0;
+        timerLabel.setText("Time: 00:00");
     }
 
     public static void main(String[] args) {

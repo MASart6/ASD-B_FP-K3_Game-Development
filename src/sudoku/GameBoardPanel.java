@@ -10,25 +10,25 @@
 
 package sudoku;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.EventListenerList;
+import java.util.HashSet;
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;
-
     public static final int CELL_SIZE = 60;
     public static final int BOARD_WIDTH = CELL_SIZE * SudokuConstants.GRID_SIZE;
     public static final int BOARD_HEIGHT = CELL_SIZE * SudokuConstants.GRID_SIZE;
 
     private Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
     private Puzzle puzzle = new Puzzle();
-    private EventListenerList listenerList = new EventListenerList();
     private String currentDifficulty = "Easy";
 
     public GameBoardPanel() {
         super.setLayout(new GridLayout(SudokuConstants.GRID_SIZE, SudokuConstants.GRID_SIZE));
+
+        // Initialize cells
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
                 cells[row][col] = new Cell(row, col);
@@ -36,6 +36,7 @@ public class GameBoardPanel extends JPanel {
             }
         }
 
+        // Add listener to all editable cells
         CellInputListener listener = new CellInputListener();
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
@@ -44,6 +45,7 @@ public class GameBoardPanel extends JPanel {
                 }
             }
         }
+
         super.setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
     }
 
@@ -66,8 +68,14 @@ public class GameBoardPanel extends JPanel {
         }
     }
 
+
     public void resetGame() {
         newGame();
+    }
+
+    public void setDifficulty(String difficulty) {
+        currentDifficulty = difficulty;
+        newGame();  // Restart the game with the new difficulty
     }
 
     private int getCellsToGuess(String difficulty) {
@@ -85,12 +93,13 @@ public class GameBoardPanel extends JPanel {
 
     public void giveHint() {
         int[][] solution = puzzle.getSolution();
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-                if (cells[row][col].status == CellStatus.TO_GUESS) {
-                    cells[row][col].setText(String.valueOf(solution[row][col]));
-                    cells[row][col].setEditable(false);
-                    cells[row][col].status = CellStatus.CORRECT_GUESS;
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                Cell cell = cells[row][col];
+                if (cell.status == CellStatus.TO_GUESS) {
+                    cell.setText(String.valueOf(solution[row][col]));
+                    cell.setEditable(false);
+                    cell.status = CellStatus.CORRECT_GUESS;
                     notifyStatusListeners();
                     return;
                 }
@@ -100,9 +109,8 @@ public class GameBoardPanel extends JPanel {
     }
 
     public void checkProgress() {
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-                Cell cell = cells[row][col];
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
                 if (cell.status == CellStatus.TO_GUESS || cell.status == CellStatus.WRONG_GUESS) {
                     JOptionPane.showMessageDialog(this, "Puzzle not solved yet!");
                     return;
@@ -114,8 +122,8 @@ public class GameBoardPanel extends JPanel {
 
     public void solvePuzzle() {
         int[][] solution = puzzle.getSolution();
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
                 cells[row][col].setText(String.valueOf(solution[row][col]));
                 cells[row][col].setEditable(false);
                 cells[row][col].status = CellStatus.CORRECT_GUESS;
@@ -126,9 +134,9 @@ public class GameBoardPanel extends JPanel {
 
     public int getRemainingCells() {
         int count = 0;
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-                if (cells[row][col].status == CellStatus.TO_GUESS) {
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                if (cell.status == CellStatus.TO_GUESS) {
                     count++;
                 }
             }
@@ -136,32 +144,71 @@ public class GameBoardPanel extends JPanel {
         return count;
     }
 
-    public void addStatusListener(ActionListener listener) {
-        listenerList.add(ActionListener.class, listener);
+    private void highlightConflicts() {
+        // Clear all previous highlights
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                cells[row][col].setHighlight(false); // Ensure no lingering highlights
+            }
+        }
+
+        // Detect conflicts in rows and columns
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                if (!cells[row][col].isEditable()) continue; // Skip non-editable cells
+
+                int num = cells[row][col].getEnteredValue();
+                if (num == 0) continue; // Skip empty cells
+
+                // Check for conflicts in the same row and column
+                boolean conflict = false;
+                for (int i = 0; i < SudokuConstants.GRID_SIZE; ++i) {
+                    // Check row
+                    if (i != col && cells[row][i].getEnteredValue() == num) {
+                        cells[row][col].setHighlight(true);
+                        cells[row][i].setHighlight(true);
+                        conflict = true;
+                    }
+                    // Check column
+                    if (i != row && cells[i][col].getEnteredValue() == num) {
+                        cells[row][col].setHighlight(true);
+                        cells[i][col].setHighlight(true);
+                        conflict = true;
+                    }
+                }
+            }
+        }
     }
 
     private void notifyStatusListeners() {
+        ActionEvent event = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "statusUpdate");
         for (ActionListener listener : listenerList.getListeners(ActionListener.class)) {
-            listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "statusUpdate"));
+            listener.actionPerformed(event);
         }
     }
+
 
     private class CellInputListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             Cell sourceCell = (Cell) e.getSource();
-            try {
-                int numberIn = Integer.parseInt(sourceCell.getText().trim());
-                if (numberIn == sourceCell.number) {
-                    sourceCell.status = CellStatus.CORRECT_GUESS;
-                } else {
-                    sourceCell.status = CellStatus.WRONG_GUESS;
+            int numberIn = Integer.parseInt(sourceCell.getText());
+
+            // Check for conflicts after user input
+            highlightConflicts();
+
+            // After checking for conflicts, update the cell status (if needed)
+            // e.g., highlight the cells with the same value as the guess
+            highlightSameValueCells(numberIn);
+        }
+    }
+
+    private void highlightSameValueCells(int value) {
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                if (cells[row][col].getEnteredValue() == value) {
+                    cells[row][col].setHighlight(true);
                 }
-                sourceCell.paint();
-                notifyStatusListeners();
-            } catch (NumberFormatException ex) {
-                sourceCell.setText("");
-                JOptionPane.showMessageDialog(null, "Invalid input! Enter numbers between 1-9.");
             }
         }
     }
