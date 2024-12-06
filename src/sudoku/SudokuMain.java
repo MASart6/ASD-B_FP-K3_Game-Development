@@ -80,6 +80,7 @@ public class SudokuMain extends JFrame {
         optionsMenu.add(hardItem);
         optionsMenu.addSeparator();
 
+
         // Functional options
         JMenuItem checkItem = new JMenuItem("Check Progress");
         checkItem.addActionListener(e -> {
