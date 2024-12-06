@@ -10,7 +10,6 @@
 
 package sudoku;
 
-
 /**
  * The Sudoku number puzzle to be solved
  */
@@ -28,30 +27,33 @@ public class Puzzle {
         super();
     }
 
-    // Generate a new puzzle given the number of cells to be guessed, which can be used
+    // Generate a new puzzle given the number of cells to be guessed, which can be
+    // used
     // to control the difficulty level.
     // This method shall set (or update) the arrays numbers and isGiven
     public void newPuzzle(int cellsToGuess) {
-        // Generate a solved puzzle (you could implement your own algorithm or hardcode it)
+        // Generate a solved puzzle (you could implement your own algorithm or hardcode
+        // it)
         generateSolvedPuzzle();
 
         // Now, create a puzzle with `cellsToGuess` empty cells (difficulty control)
         setPuzzleDifficulty(cellsToGuess);
     }
 
-    // Method to generate a fully solved Sudoku puzzle (for simplicity, we'll hardcode it)
+    // Method to generate a fully solved Sudoku puzzle (for simplicity, we'll
+    // hardcode it)
     private void generateSolvedPuzzle() {
         // Hardcoded solved puzzle
         int[][] hardcodedNumbers = {
-                {5, 3, 4, 6, 7, 8, 9, 1, 2},
-                {6, 7, 2, 1, 9, 5, 3, 4, 8},
-                {1, 9, 8, 3, 4, 2, 5, 6, 7},
-                {8, 5, 9, 7, 6, 1, 4, 2, 3},
-                {4, 2, 6, 8, 5, 3, 7, 9, 1},
-                {7, 1, 3, 9, 2, 4, 8, 5, 6},
-                {9, 6, 1, 5, 3, 7, 2, 8, 4},
-                {2, 8, 7, 4, 1, 9, 6, 3, 5},
-                {3, 4, 5, 2, 8, 6, 1, 7, 9}
+                { 5, 3, 4, 6, 7, 8, 9, 1, 2 },
+                { 6, 7, 2, 1, 9, 5, 3, 4, 8 },
+                { 1, 9, 8, 3, 4, 2, 5, 6, 7 },
+                { 8, 5, 9, 7, 6, 1, 4, 2, 3 },
+                { 4, 2, 6, 8, 5, 3, 7, 9, 1 },
+                { 7, 1, 3, 9, 2, 4, 8, 5, 6 },
+                { 9, 6, 1, 5, 3, 7, 2, 8, 4 },
+                { 2, 8, 7, 4, 1, 9, 6, 3, 5 },
+                { 3, 4, 5, 2, 8, 6, 1, 7, 9 }
         };
 
         // Copy from hardcodedNumbers into numbers array
@@ -64,7 +66,14 @@ public class Puzzle {
         // Initially, all cells are considered given
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-                isGiven[row][col] = true;  // Set all cells to be initially filled
+                isGiven[row][col] = true; // Set all cells to be initially filled
+            }
+        }
+
+        // Copy solved puzzle into solution array
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                solution[row][col] = numbers[row][col];
             }
         }
     }
@@ -80,13 +89,14 @@ public class Puzzle {
             if (isGiven[row][col]) {
                 // Remove the number by setting it to 0 and updating isGiven to false
                 numbers[row][col] = 0;
-                isGiven[row][col] = false;  // The cell is now to be guessed
+                isGiven[row][col] = false; // The cell is now to be guessed
                 cellsRemoved++;
             }
         }
     }
 
-    // Accessor methods for numbers and isGiven, in case you need them in GameBoardPanel
+    // Accessor methods for numbers and isGiven, in case you need them in
+    // GameBoardPanel
     public int[][] getNumbers() {
         return numbers;
     }

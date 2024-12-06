@@ -13,7 +13,6 @@ package sudoku;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.HashSet;
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -51,7 +50,7 @@ public class GameBoardPanel extends JPanel {
 
     public void newGame() {
         int cellsToGuess = getCellsToGuess(currentDifficulty);
-        puzzle.newPuzzle(cellsToGuess);  // Pass the number of cells to guess
+        puzzle.newPuzzle(cellsToGuess); // Pass the number of cells to guess
 
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
@@ -62,12 +61,11 @@ public class GameBoardPanel extends JPanel {
                 } catch (Exception e) {
                     // Handle any unexpected exceptions
                     System.out.println("Error setting number at (" + row + "," + col + "): " + e.getMessage());
-                    cells[row][col].newGame(0, puzzle.isGiven[row][col]);  // Use default or error value
+                    cells[row][col].newGame(0, puzzle.isGiven[row][col]); // Use default or error value
                 }
             }
         }
     }
-
 
     public void resetGame() {
         newGame();
@@ -75,19 +73,19 @@ public class GameBoardPanel extends JPanel {
 
     public void setDifficulty(String difficulty) {
         currentDifficulty = difficulty;
-        newGame();  // Restart the game with the new difficulty
+        newGame(); // Restart the game with the new difficulty
     }
 
     private int getCellsToGuess(String difficulty) {
         switch (difficulty) {
             case "Easy":
-                return 40;  // Example: 40 cells to guess for Easy
+                return 40; // Example: 40 cells to guess for Easy
             case "Medium":
-                return 50;  // Example: 50 cells to guess for Medium
+                return 50; // Example: 50 cells to guess for Medium
             case "Hard":
-                return 60;  // Example: 60 cells to guess for Hard
+                return 60; // Example: 60 cells to guess for Hard
             default:
-                return 40;  // Default to Easy if something unexpected happens
+                return 40; // Default to Easy if something unexpected happens
         }
     }
 
@@ -152,29 +150,26 @@ public class GameBoardPanel extends JPanel {
             }
         }
 
-
         // Detect conflicts in rows and columns
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-                if (!cells[row][col].isEditable()) continue; // Skip non-editable cells
+                if (!cells[row][col].isEditable())
+                    continue; // Skip non-editable cells
 
                 int num = cells[row][col].getEnteredValue();
-                if (num == 0) continue; // Skip empty cells
+                if (num == 0)
+                    continue; // Skip empty cells
 
-                // Check for conflicts in the same row and column
-                boolean conflict = false;
                 for (int i = 0; i < SudokuConstants.GRID_SIZE; ++i) {
                     // Check row
                     if (i != col && cells[row][i].getEnteredValue() == num) {
                         cells[row][col].setHighlight(true);
                         cells[row][i].setHighlight(true);
-                        conflict = true;
                     }
                     // Check column
                     if (i != row && cells[i][col].getEnteredValue() == num) {
                         cells[row][col].setHighlight(true);
                         cells[i][col].setHighlight(true);
-                        conflict = true;
                     }
                 }
             }
@@ -187,7 +182,6 @@ public class GameBoardPanel extends JPanel {
             listener.actionPerformed(event);
         }
     }
-
 
     private class CellInputListener implements ActionListener {
         @Override

@@ -30,7 +30,7 @@ public class SudokuMain extends JFrame {
         cp.add(statusBar, BorderLayout.SOUTH);
 
         // Timer setup
-        timer = new Timer(1000, e -> updateTimer());
+        timer = new Timer(1000, _ -> updateTimer());
         timer.start();
 
         // Add a menu bar
@@ -39,17 +39,17 @@ public class SudokuMain extends JFrame {
         // File menu
         JMenu fileMenu = new JMenu("File");
         JMenuItem newGameItem = new JMenuItem("New Game");
-        newGameItem.addActionListener(e -> {
+        newGameItem.addActionListener(_ -> {
             board.newGame();
             updateStatusBar();
         }); // Start new game
         JMenuItem resetGameItem = new JMenuItem("Reset Game");
-        resetGameItem.addActionListener(e -> {
+        resetGameItem.addActionListener(_ -> {
             board.resetGame();
             updateStatusBar();
         }); // Reset the game
         JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener(e -> System.exit(0));
+        exitItem.addActionListener(_ -> System.exit(0));
         fileMenu.add(newGameItem);
         fileMenu.add(resetGameItem);
         fileMenu.addSeparator();
@@ -60,30 +60,29 @@ public class SudokuMain extends JFrame {
 
         // Difficulty options
         JMenuItem easyItem = new JMenuItem("Easy");
-        easyItem.addActionListener(e -> board.setDifficulty("Easy"));
+        easyItem.addActionListener(_ -> board.setDifficulty("Easy"));
         JMenuItem mediumItem = new JMenuItem("Intermediate");
-        mediumItem.addActionListener(e -> board.setDifficulty("Intermediate"));
+        mediumItem.addActionListener(_ -> board.setDifficulty("Intermediate"));
         JMenuItem hardItem = new JMenuItem("Hard");
-        hardItem.addActionListener(e -> board.setDifficulty("Hard"));
+        hardItem.addActionListener(_ -> board.setDifficulty("Hard"));
         optionsMenu.add(easyItem);
         optionsMenu.add(mediumItem);
         optionsMenu.add(hardItem);
         optionsMenu.addSeparator();
 
-
         // Functional options
         JMenuItem checkItem = new JMenuItem("Check Progress");
-        checkItem.addActionListener(e -> {
+        checkItem.addActionListener(_ -> {
             board.checkProgress();
             updateStatusBar();
         });
         JMenuItem hintItem = new JMenuItem("Hint");
-        hintItem.addActionListener(e -> {
+        hintItem.addActionListener(_ -> {
             board.giveHint();
             updateStatusBar();
         });
         JMenuItem solveItem = new JMenuItem("Solve");
-        solveItem.addActionListener(e -> {
+        solveItem.addActionListener(_ -> {
             board.solvePuzzle();
             updateStatusBar();
         });
@@ -94,7 +93,7 @@ public class SudokuMain extends JFrame {
         // Help menu
         JMenu helpMenu = new JMenu("Help");
         JMenuItem aboutItem = new JMenuItem("About");
-        aboutItem.addActionListener(e -> JOptionPane.showMessageDialog(this, "Sudoku Game v1.0"));
+        aboutItem.addActionListener(_ -> JOptionPane.showMessageDialog(this, "Sudoku Game v1.0"));
         helpMenu.add(aboutItem);
 
         // Add menus to the menu bar
@@ -115,17 +114,6 @@ public class SudokuMain extends JFrame {
 
     }
 
-    private void addDifficultyMenuItem(JMenu menu, String difficulty) {
-        JMenuItem item = new JMenuItem(difficulty);
-        item.addActionListener(e -> {
-            board.setDifficulty(difficulty);
-            board.newGame();
-            resetTimer();
-            updateStatusBar();
-        });
-        menu.add(item);
-    }
-
     // Updates the timer label every second
     private void updateTimer() {
         seconds++;
@@ -136,11 +124,6 @@ public class SudokuMain extends JFrame {
     private void updateStatusBar() {
         int remainingCells = board.getRemainingCells();
         statusBar.setText(remainingCells + " cells remaining");
-    }
-
-    private void resetTimer() {
-        seconds = 0;
-        timerLabel.setText("Time: 00:00");
     }
 
     public static void main(String[] args) {
