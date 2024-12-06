@@ -152,6 +152,7 @@ public class GameBoardPanel extends JPanel {
             }
         }
 
+
         // Detect conflicts in rows and columns
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
