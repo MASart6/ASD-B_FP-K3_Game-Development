@@ -42,7 +42,14 @@ public class GameMain extends JPanel {
                     if (rowSelected >= 0 && rowSelected < Board.ROWS && colSelected >= 0 && colSelected < Board.COLS
                             && board.cells[rowSelected][colSelected].content == Seed.NO_SEED) {
                         board.cells[rowSelected][colSelected].content = currentPlayer;
-                        soundManager.playSoundEffect("boop-741-mhz-39314.wav");
+
+                        // Mainkan efek suara berdasarkan giliran
+                        if (currentPlayer == Seed.CROSS) {
+                            soundManager.playSoundEffect("cat-meow-6226.wav");
+                        } else if (currentPlayer == Seed.NOUGHT) {
+                            soundManager.playSoundEffect("dog-bark-179915.wav");
+                        }
+
                         updateGame(currentPlayer, rowSelected, colSelected);
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                     }
@@ -106,5 +113,4 @@ public class GameMain extends JPanel {
             frame.setVisible(true);
         });
     }
-
 }
