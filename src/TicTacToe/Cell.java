@@ -10,6 +10,7 @@
 
 package TicTacToe;
 import java.awt.*;
+
 /**
  * The Cell class models each individual cell of the game board.
  */
@@ -23,7 +24,7 @@ public class Cell {
 
    // Define properties (package-visible)
    /** Content of this cell (Seed.EMPTY, Seed.CROSS, or Seed.NOUGHT) */
-    Seed content;
+    public Seed content;
    /** Row and column of this cell */
     int row, col;
 
