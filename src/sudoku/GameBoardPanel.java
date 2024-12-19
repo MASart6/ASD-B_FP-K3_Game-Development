@@ -22,6 +22,9 @@ public class GameBoardPanel extends JPanel {
 
     private Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
     private Puzzle puzzle = new Puzzle();
+    private int filledCellsCount = 0;  // Jumlah sel yang diisi dengan benar
+    private int totalCells = SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE;
+
     private String currentDifficulty = "Easy";
 
     public GameBoardPanel() {
@@ -65,6 +68,17 @@ public class GameBoardPanel extends JPanel {
                 }
             }
         }
+    }
+
+    public boolean isSolved() {
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                if (cells[row][col].status == CellStatus.TO_GUESS || cells[row][col].status == CellStatus.WRONG_GUESS) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void resetGame() {
@@ -142,39 +156,6 @@ public class GameBoardPanel extends JPanel {
         return count;
     }
 
-    private void highlightConflicts() {
-        // Clear all previous highlights
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-                cells[row][col].setHighlight(false); // Ensure no lingering highlights
-            }
-        }
-
-        // Detect conflicts in rows and columns
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-                if (!cells[row][col].isEditable())
-                    continue; // Skip non-editable cells
-
-                int num = cells[row][col].getEnteredValue();
-                if (num == 0)
-                    continue; // Skip empty cells
-
-                for (int i = 0; i < SudokuConstants.GRID_SIZE; ++i) {
-                    // Check row
-                    if (i != col && cells[row][i].getEnteredValue() == num) {
-                        cells[row][col].setHighlight(true);
-                        cells[row][i].setHighlight(true);
-                    }
-                    // Check column
-                    if (i != row && cells[i][col].getEnteredValue() == num) {
-                        cells[row][col].setHighlight(true);
-                        cells[i][col].setHighlight(true);
-                    }
-                }
-            }
-        }
-    }
 
     private void notifyStatusListeners() {
         ActionEvent event = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "statusUpdate");
@@ -187,23 +168,27 @@ public class GameBoardPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             Cell sourceCell = (Cell) e.getSource();
-            int numberIn = Integer.parseInt(sourceCell.getText());
-
-            // Check for conflicts after user input
-            highlightConflicts();
-
-            // After checking for conflicts, update the cell status (if needed)
-            // e.g., highlight the cells with the same value as the guess
-            highlightSameValueCells(numberIn);
-        }
-    }
-
-    private void highlightSameValueCells(int value) {
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-                if (cells[row][col].getEnteredValue() == value) {
-                    cells[row][col].setHighlight(true);
+            try {
+                int numberIn = Integer.parseInt(sourceCell.getText());
+                if (numberIn == sourceCell.number) {
+                    if (sourceCell.status != CellStatus.CORRECT_GUESS) {
+                        filledCellsCount++;  // Tambah jumlah sel yang terisi dengan benar
+                    }
+                    sourceCell.status = CellStatus.CORRECT_GUESS;
+                } else {
+                    if (sourceCell.status == CellStatus.CORRECT_GUESS) {
+                        filledCellsCount--;  // Kurangi jumlah sel yang terisi jika sebelumnya benar
+                    }
+                    sourceCell.status = CellStatus.WRONG_GUESS;
                 }
+                sourceCell.paint();  // Repaint cell
+            } catch (NumberFormatException ex) {
+                sourceCell.setText("");  // Reset jika input tidak valid
+            }
+
+            if (isSolved()) {
+                JOptionPane.showMessageDialog(null, "Congratulations! You solved the puzzle!");
+                newGame();
             }
         }
     }

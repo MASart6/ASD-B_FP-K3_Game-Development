@@ -77,26 +77,4 @@ public class Cell extends JTextField {
             super.setBackground(BG_WRONG_GUESS);
         }
     }
-
-    /** Get the entered value from the cell as an integer. */
-    public int getEnteredValue() {
-        try {
-            String text = super.getText().trim();
-            if (!text.isEmpty()) {
-                return Integer.parseInt(text);
-            }
-        } catch (NumberFormatException e) {
-            // Handle the case where the input is not a valid number
-        }
-        return 0;  // Return 0 or some default value for empty/invalid input
-    }
-
-    /** Set the background color to highlight the cell (for conflict or other visual cues). */
-    public void setHighlight(boolean highlight) {
-        if (highlight) {
-            this.setBackground(Color.RED);  // Red for conflicts
-        } else {
-            this.setBackground(BG_TO_GUESS);  // Default background color for guessable cells
-        }
-    }
 }
